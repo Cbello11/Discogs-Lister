@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+{% block title %}{{ release.title }} — List{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center gap-3 mb-4">
+  <a href="{{ url_for('search.search') }}" class="btn btn-sm btn-outline-secondary">
+    <i class="bi bi-arrow-left"></i> Back
+  </a>
+  <h2 class="mb-0">New Listing</h2>
+  <span class="badge bg-secondary">Draft #{{ draft.id }}</span>
+  <span id="autosaveStatus" class="text-muted small ms-auto"></span>
+</div>
+
+<form id="listingForm" method="POST" action="{{ url_for('listing.submit', draft_id=draft.id) }}">
+<div class="row g-4">
+
+  <!-- LEFT: Release Info -->
+  <div class="col-lg-5">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        {% if release.images %}
+          <img src="{{ release.images[0] }}" alt="cover" class="img-fluid rounded mb-3 w-100" style="max-height:250px;object-fit:cover">
+        {% endif %}
+        <h5 class="fw-bold">{{ release.title }}</h5>
+        <p class="text-muted mb-1">{{ release.artists | join(", ") }}</p>
+        <div class="small text-muted mb-3">
+          {% if release.year %}<span class="me-2"><i class="bi bi-calendar3 me-1"></i>{{ release.year }}</span>{% endif %}
+          {% if release.country %}<span class="me-2"><i class="bi bi-globe me-1"></i>{{ release.country }}</span>{% endif %}
+          {% if release.labels %}<span><i class="bi bi-building me-1"></i>{{ release.labels[0].name }}</span>{% endif %}
+        </div>
+        {% if release.genres %}
+          <div class="mb-2">
+            {% for g in release.genres %}<span class="badge bg-light text-dark me-1">{{ g }}</span>{% endfor %}
+          </div>
+        {% endif %}
+        {% if release.formats %}
+          <div class="mb-3">
+            {% for f in release.formats %}
+              <span class="badge bg-warning text-dark me-1">{{ f.get('name','') }}</span>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        {% if release.tracklist %}
+        <details>
+          <summary class="text-muted small cursor-pointer">Tracklist ({{ release.tracklist|length }} tracks)</summary>
+          <ol class="mt-2 small">
+            {% for t in release.tracklist %}
+              <li class="text-muted">{{ t.title }} {% if t.duration %}<span class="float-end">{{ t.duration }}</span>{% endif %}</li>
+            {% endfor %}
+          </ol>
+        </details>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Listing Details -->
+  <div class="col-lg-7">
+    <div class="card border-0 shadow-sm mb-3">
+      <div class="card-body">
+
+        <!-- Condition -->
+        <h6 class="fw-semibold mb-2">
+          Media Condition
+          <button type="button" class="btn btn-sm btn-link p-0 ms-2" data-bs-toggle="modal" data-bs-target="#conditionGuideModal">
+            <i class="bi bi-question-circle"></i> Guide
+          </button>
+        </h6>
+        <div class="btn-group flex-wrap mb-3" role="group">
+          {% for grade, color in [('M','success'),('NM','success'),('VG+','info'),('VG','info'),('G+','warning'),('G','warning'),('F','danger'),('P','danger')] %}
+          <input type="radio" class="btn-check" name="media_condition" id="mc_{{ grade }}" value="{{ grade }}"
+                 {% if draft.media_condition == grade %}checked{% endif %}>
+          <label class="btn btn-outline-{{ color }} btn-sm" for="mc_{{ grade }}">{{ grade }}</label>
+          {% endfor %}
+        </div>
+
+        <h6 class="fw-semibold mb-2">Sleeve Condition</h6>
+        <div class="btn-group flex-wrap mb-3" role="group">
+          {% for grade, color in [('M','success'),('NM','success'),('VG+','info'),('VG','info'),('G+','warning'),('G','warning'),('F','danger'),('P','danger'),('No Cover','secondary')] %}
+          <input type="radio" class="btn-check" name="sleeve_condition" id="sc_{{ loop.index }}" value="{{ grade }}"
+                 {% if draft.sleeve_condition == grade %}checked{% endif %}>
+          <label class="btn btn-outline-{{ color }} btn-sm" for="sc_{{ loop.index }}">{{ grade }}</label>
+          {% endfor %}
+        </div>
+
+        <!-- Price -->
+        <h6 class="fw-semibold mb-2">Price</h6>
+        <div class="row g-2 mb-2">
+          <div class="col-4">
+            <select name="currency" class="form-select form-select-sm">
+              {% for cur in ['USD','EUR','GBP','CAD','AUD','JPY'] %}
+              <option {% if (draft.currency or 'USD') == cur %}selected{% endif %}>{{ cur }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-8">
+            <input type="number" name="price" id="priceInput" class="form-control form-control-sm"
+                   step="0.01" min="0.01" placeholder="0.00" value="{{ draft.price or '' }}" required>
+          </div>
+        </div>
+
+        <!-- Price Intelligence -->
+        <div class="card bg-light border-0 mb-3 p-3">
+          <div class="row text-center small mb-2">
+            <div class="col">
+              <div class="text-muted">Low</div>
+              <div class="fw-bold text-success" id="priceLow">
+                {% if pricing.low %}${{ "%.2f"|format(pricing.low) }}{% else %}—{% endif %}
+              </div>
+            </div>
+            <div class="col">
+              <div class="text-muted">Median</div>
+              <div class="fw-bold text-primary" id="priceMedian">
+                {% if pricing.median %}${{ "%.2f"|format(pricing.median) }}{% else %}—{% endif %}
+              </div>
+            </div>
+            <div class="col">
+              <div class="text-muted">High</div>
+              <div class="fw-bold text-danger" id="priceHigh">
+                {% if pricing.high %}${{ "%.2f"|format(pricing.high) }}{% else %}—{% endif %}
+              </div>
+            </div>
+            <div class="col">
+              <div class="text-muted">For Sale</div>
+              <div class="fw-bold" id="priceCount">{{ pricing.num_for_sale or '—' }}</div>
+            </div>
+          </div>
+          <div class="d-flex gap-2">
+            {% if pricing.suggested %}
+            <button type="button" class="btn btn-sm btn-outline-primary flex-grow-1"
+                    onclick="document.getElementById('priceInput').value='{{ '%.2f'|format(pricing.suggested) }}'">
+              Use Median (${{ "%.2f"|format(pricing.suggested) }})
+            </button>
+            {% endif %}
+            <button type="button" class="btn btn-sm btn-outline-secondary" id="refreshPrice"
+                    data-release-id="{{ release.id }}">
+              <i class="bi bi-arrow-clockwise"></i> Refresh
+            </button>
+          </div>
+        </div>
+
+        <!-- Details -->
+        <div class="row g-2 mb-2">
+          <div class="col-6">
+            <label class="form-label small">Ships From</label>
+            <input type="text" name="location" class="form-control form-control-sm"
+                   value="{{ draft.location or '' }}" placeholder="City, Country">
+          </div>
+          <div class="col-3">
+            <label class="form-label small">Quantity</label>
+            <input type="number" name="quantity" class="form-control form-control-sm"
+                   min="1" value="{{ draft.quantity or 1 }}">
+          </div>
+          <div class="col-3 d-flex align-items-end">
+            <div class="form-check mb-2">
+              <input class="form-check-input" type="checkbox" name="allow_offers" id="allowOffers"
+                     {% if draft.allow_offers %}checked{% endif %}>
+              <label class="form-check-label small" for="allowOffers">Allow Offers</label>
+            </div>
+          </div>
+        </div>
+
+        <label class="form-label small">Comments / Notes</label>
+        <textarea name="comments" class="form-control form-control-sm mb-3" rows="3"
+                  placeholder="Describe any defects, special pressings, inserts included…">{{ draft.comments or '' }}</textarea>
+
+        <!-- Image Upload -->
+        <h6 class="fw-semibold mb-2">Photos <small class="text-muted fw-normal">(max 3)</small></h6>
+        <div id="dropZone" class="drop-zone mb-2">
+          <i class="bi bi-cloud-arrow-up fs-4 text-muted"></i>
+          <p class="mb-0 small text-muted">Drag &amp; drop photos here, or click to browse</p>
+          <input type="file" id="imageFileInput" accept="image/*" multiple class="d-none">
+        </div>
+        <div id="imagePreviews" class="d-flex gap-2 flex-wrap mb-3">
+          {% for path in draft.image_paths %}
+          <div class="image-preview-item" data-index="{{ loop.index0 }}">
+            <img src="{{ url_for('static', filename='uploads/' + path.split('/')[-1]) }}" alt="">
+            <button type="button" class="btn-remove-img" data-index="{{ loop.index0 }}"
+                    data-url="{{ url_for('listing.delete_image', draft_id=draft.id, index=loop.index0) }}">
+              <i class="bi bi-x"></i>
+            </button>
+          </div>
+          {% endfor %}
+        </div>
+
+        <!-- Actions -->
+        <div class="d-flex gap-2 flex-wrap">
+          <button type="submit" class="btn btn-warning fw-semibold flex-grow-1">
+            <i class="bi bi-send me-2"></i>List Now
+          </button>
+          <button type="button" id="saveDraftBtn" class="btn btn-outline-secondary">
+            <i class="bi bi-floppy me-1"></i>Save Draft
+          </button>
+          <a href="{{ url_for('listing.bulk') }}" class="btn btn-outline-primary">
+            <i class="bi bi-collection me-1"></i>Bulk Queue
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const DRAFT_ID = {{ draft.id }};
+  const RELEASE_ID = {{ release.id }};
+  const UPLOAD_URL = "{{ url_for('listing.upload_image', draft_id=draft.id) }}";
+  const SAVE_URL = "{{ url_for('listing.save_draft', draft_id=draft.id) }}";
+  const PRICE_URL = "/api/price/" + RELEASE_ID;
+</script>
+<script src="{{ url_for('static', filename='js/images.js') }}"></script>
+<script src="{{ url_for('static', filename='js/listing.js') }}"></script>
+{% endblock %}

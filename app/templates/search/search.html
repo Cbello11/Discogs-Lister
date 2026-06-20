@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Search — Discogs Lister{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Search Releases</h2>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-7">
+    <div class="input-group input-group-lg">
+      <span class="input-group-text bg-white border-end-0">
+        <i class="bi bi-search text-muted"></i>
+      </span>
+      <input type="text" id="searchInput" class="form-control border-start-0 ps-0"
+             placeholder="Artist, album, label, barcode…" autocomplete="off">
+    </div>
+  </div>
+  <div class="col-md-3">
+    <select id="formatFilter" class="form-select form-select-lg">
+      <option value="All">All Formats</option>
+      <option value="Vinyl">Vinyl</option>
+      <option value="CD">CD</option>
+      <option value="Cassette">Cassette</option>
+      <option value="DVD">DVD</option>
+      <option value="Blu-ray">Blu-ray</option>
+      <option value="Box Set">Box Set</option>
+    </select>
+  </div>
+  <div class="col-md-2">
+    <button id="searchBtn" class="btn btn-warning btn-lg w-100 fw-semibold">Search</button>
+  </div>
+</div>
+
+<div id="searchStatus" class="text-muted small mb-3"></div>
+
+<div id="searchResults" class="row g-3"></div>
+
+<div id="pagination" class="d-flex justify-content-center mt-4 gap-2"></div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/search.js') }}"></script>
+{% endblock %}

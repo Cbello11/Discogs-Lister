@@ -1,0 +1,29 @@
+<div class="accordion" id="conditionAccordion">
+
+  {% set grades = [
+    ("M", "Mint", "success", "Absolutely perfect in every way. Never been played. Only possible for an unplayed record."),
+    ("NM", "Near Mint", "success", "Nearly perfect. Looks unplayed. May have been opened but shows no signs of play."),
+    ("VG+", "Very Good Plus", "info", "Shows some signs of play but no major defects. Occasional light scuffs. May have some light hairlines."),
+    ("VG", "Very Good", "info", "Some obvious signs of handling and play. Minor scratches that don't affect playback."),
+    ("G+", "Good Plus", "warning", "Significant signs of wear. Record plays through but with surface noise throughout."),
+    ("G", "Good", "warning", "Heavy wear throughout. Plays through with significant surface noise and possible skipping."),
+    ("F", "Fair", "danger", "Very heavy wear. Record plays but may skip. Only for completists."),
+    ("P", "Poor", "danger", "Worst possible condition. Barely plays at all. Collectible only for the label or artwork.")
+  ] %}
+
+  {% for code, name, color, desc in grades %}
+  <div class="accordion-item border-0 mb-2">
+    <h2 class="accordion-header">
+      <button class="accordion-button collapsed rounded" type="button"
+              data-bs-toggle="collapse" data-bs-target="#grade-{{ code }}">
+        <span class="badge bg-{{ color }} me-3" style="min-width:3rem">{{ code }}</span>
+        <strong>{{ name }}</strong>
+      </button>
+    </h2>
+    <div id="grade-{{ code }}" class="accordion-collapse collapse" data-bs-parent="#conditionAccordion">
+      <div class="accordion-body text-muted">{{ desc }}</div>
+    </div>
+  </div>
+  {% endfor %}
+
+</div>

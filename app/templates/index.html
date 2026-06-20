@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — Discogs Lister{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Dashboard</h2>
+
+<div class="row g-4 mb-5">
+  <div class="col-sm-6 col-lg-3">
+    <div class="card text-center border-0 shadow-sm">
+      <div class="card-body py-4">
+        <div class="display-5 fw-bold text-warning">{{ listing_count }}</div>
+        <div class="text-muted small">Total Listed</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <div class="card text-center border-0 shadow-sm">
+      <div class="card-body py-4">
+        <div class="display-5 fw-bold text-info">{{ draft_count }}</div>
+        <div class="text-muted small">Saved Drafts</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <a href="{{ url_for('search.search') }}" class="card text-center border-0 shadow-sm text-decoration-none">
+      <div class="card-body py-4">
+        <i class="bi bi-plus-circle display-5 text-success"></i>
+        <div class="text-muted small mt-1">New Listing</div>
+      </div>
+    </a>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <a href="{{ url_for('listing.bulk') }}" class="card text-center border-0 shadow-sm text-decoration-none">
+      <div class="card-body py-4">
+        <i class="bi bi-collection display-5 text-primary"></i>
+        <div class="text-muted small mt-1">Bulk Queue</div>
+      </div>
+    </a>
+  </div>
+</div>
+
+{% if recent %}
+<h5 class="mb-3">Recent Listings</h5>
+<div class="card border-0 shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>Title</th>
+          <th>Artist</th>
+          <th>Condition</th>
+          <th>Price</th>
+          <th>Date</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in recent %}
+        <tr>
+          <td>{{ r.release_title }}</td>
+          <td>{{ r.artist }}</td>
+          <td><span class="badge bg-secondary">{{ r.media_condition }}</span></td>
+          <td>${{ "%.2f"|format(r.final_price or 0) }}</td>
+          <td>{{ r.listed_at.strftime("%b %d, %Y") if r.listed_at else "" }}</td>
+          <td>
+            {% if r.discogs_url %}
+              <a href="{{ r.discogs_url }}" target="_blank" class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-box-arrow-up-right"></i>
+              </a>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+<a href="{{ url_for('history.history') }}" class="btn btn-link mt-2">View full history →</a>
+{% else %}
+<div class="text-center text-muted py-5">
+  <i class="bi bi-vinyl display-1 text-warning opacity-25"></i>
+  <p class="mt-3">No listings yet. <a href="{{ url_for('search.search') }}">Search for a release to get started.</a></p>
+</div>
+{% endif %}
+{% endblock %}
