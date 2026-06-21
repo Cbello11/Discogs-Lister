@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Login — Discogs Lister{% endblock %}
+
+{% block content_public %}
+<div class="row justify-content-center">
+  <div class="col-md-6 col-lg-5">
+    <div class="text-center mb-5">
+      <i class="bi bi-vinyl-fill display-1 text-warning"></i>
+      <h1 class="h3 mt-3 fw-bold">Discogs Lister</h1>
+      <p class="text-muted">Automated record listing made easy</p>
+    </div>
+
+    <!-- Personal Token (simpler) -->
+    <div class="card shadow-sm border-0 mb-4">
+      <div class="card-header bg-warning text-dark fw-semibold">
+        <i class="bi bi-key me-2"></i>Quick Connect — Personal Token
+      </div>
+      <div class="card-body">
+        <p class="text-muted small mb-3">
+          Get your token at
+          <a href="https://www.discogs.com/settings/developers" target="_blank">discogs.com/settings/developers</a>
+          → scroll down to "Personal Access Token".
+        </p>
+        <form method="POST" action="{{ url_for('auth.token_login') }}">
+          <div class="mb-3">
+            <label class="form-label">Personal Access Token</label>
+            <input type="password" name="personal_token" class="form-control" placeholder="Paste your token here" required>
+          </div>
+          <button type="submit" class="btn btn-warning w-100 fw-semibold">
+            <i class="bi bi-plug me-2"></i>Connect
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- OAuth (full) -->
+    <div class="card shadow-sm border-0">
+      <div class="card-header bg-light fw-semibold">
+        <i class="bi bi-shield-check me-2"></i>Full OAuth Login
+      </div>
+      <div class="card-body">
+        <p class="text-muted small mb-3">
+          Requires a Discogs app with Consumer Key &amp; Secret set in your <code>.env</code> file.
+        </p>
+        <a href="{{ url_for('auth.oauth_start') }}" class="btn btn-outline-dark w-100">
+          <i class="bi bi-box-arrow-in-right me-2"></i>Connect via Discogs OAuth
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

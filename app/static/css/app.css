@@ -1,0 +1,92 @@
+/* Sidebar */
+.sidebar {
+  width: 220px;
+  min-width: 220px;
+  background: #1a1a2e;
+  color: #ccc;
+}
+.sidebar .nav-link {
+  color: #aaa;
+  border-radius: 6px;
+  padding: .4rem .75rem;
+  margin-bottom: 2px;
+  transition: background .15s;
+}
+.sidebar .nav-link:hover,
+.sidebar .nav-link.active {
+  background: rgba(255,200,0,.15);
+  color: #ffc107;
+}
+
+/* Cards */
+.card { border-radius: 10px; }
+
+/* Condition button groups */
+.btn-group .btn { border-radius: 4px !important; margin: 2px; }
+
+/* Drop zone */
+.drop-zone {
+  border: 2px dashed #dee2e6;
+  border-radius: 10px;
+  padding: 2rem 1rem;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color .2s, background .2s;
+}
+.drop-zone:hover,
+.drop-zone.drag-over {
+  border-color: #ffc107;
+  background: #fffdf0;
+}
+
+/* Image previews */
+.image-preview-item {
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+.image-preview-item img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 2px solid #dee2e6;
+}
+.image-preview-item .btn-remove-img {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: none;
+  background: #dc3545;
+  color: white;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+.image-preview-item .upload-spinner {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,.7);
+  border-radius: 6px;
+}
+
+/* Spinner animation */
+@keyframes spin { to { transform: rotate(360deg); } }
+.spin { animation: spin .7s linear infinite; display: inline-block; }
+
+/* Scrollable tracklist */
+details ol { max-height: 200px; overflow-y: auto; padding-left: 1.2rem; }
+details summary { cursor: pointer; }
+
+/* Table row hover */
+.table-hover tbody tr:hover { background: #fffdf0; }

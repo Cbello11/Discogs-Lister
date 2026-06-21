@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80">
+  <rect width="80" height="80" fill="#f0f0f0"/>
+  <circle cx="40" cy="40" r="28" fill="#ddd"/>
+  <circle cx="40" cy="40" r="8" fill="#bbb"/>
+  <circle cx="40" cy="40" r="3" fill="#999"/>
+  <text x="40" y="72" text-anchor="middle" font-size="8" fill="#999" font-family="sans-serif">No Image</text>
+</svg>
