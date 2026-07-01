@@ -18,12 +18,14 @@ def create_app():
     from app.listing import listing_bp
     from app.history import history_bp
     from app.api import api_bp
+    from app.ebay import ebay_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(search_bp)
     app.register_blueprint(listing_bp)
     app.register_blueprint(history_bp)
     app.register_blueprint(api_bp)
+    app.register_blueprint(ebay_bp)
 
     # Auth guard — skip for auth routes and static
     PUBLIC_ENDPOINTS = {"auth.login", "auth.oauth_start", "auth.oauth_callback", "auth.token_login", "static"}
@@ -38,11 +40,26 @@ def create_app():
 
     @app.route("/")
     def index():
-        from app.models import Draft, ListingRecord
+        from datetime import datetime, timedelta
+        from app.models import Draft, ListingRecord, EbayListing
         draft_count = Draft.query.count()
         listing_count = ListingRecord.query.count()
         recent = ListingRecord.query.order_by(ListingRecord.listed_at.desc()).limit(5).all()
-        return render_template("index.html", draft_count=draft_count, listing_count=listing_count, recent=recent)
+        ebay_active = EbayListing.query.filter_by(status="active").count()
+        one_week_ago = datetime.utcnow() - timedelta(days=7)
+        ebay_needs_review = EbayListing.query.filter(
+            EbayListing.status == "active",
+            EbayListing.listed_at <= one_week_ago,
+            db.or_(EbayListing.last_reviewed_at == None, EbayListing.last_reviewed_at <= one_week_ago),
+        ).count()
+        return render_template(
+            "index.html",
+            draft_count=draft_count,
+            listing_count=listing_count,
+            recent=recent,
+            ebay_active=ebay_active,
+            ebay_needs_review=ebay_needs_review,
+        )
 
     with app.app_context():
         db.create_all()

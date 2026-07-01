@@ -88,6 +88,46 @@ class ListingRecord(db.Model):
         }
 
 
+class EbayListing(db.Model):
+    __tablename__ = "ebay_listings"
+
+    id = db.Column(db.Integer, primary_key=True)
+    ebay_listing_id = db.Column(db.String(50))
+    title = db.Column(db.String(500), nullable=False)
+    artist = db.Column(db.String(500))
+    format = db.Column(db.String(100))
+    condition = db.Column(db.String(50))
+    price = db.Column(db.Float)
+    currency = db.Column(db.String(5), default="USD")
+    ebay_url = db.Column(db.String(1000))
+    status = db.Column(db.String(20), default="active")  # active, sold, ended
+    views = db.Column(db.Integer)
+    watchers = db.Column(db.Integer)
+    notes = db.Column(db.Text)
+    listed_at = db.Column(db.DateTime, default=datetime.utcnow)
+    last_reviewed_at = db.Column(db.DateTime)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "ebay_listing_id": self.ebay_listing_id,
+            "title": self.title,
+            "artist": self.artist,
+            "format": self.format,
+            "condition": self.condition,
+            "price": self.price,
+            "currency": self.currency,
+            "ebay_url": self.ebay_url,
+            "status": self.status,
+            "views": self.views,
+            "watchers": self.watchers,
+            "notes": self.notes,
+            "listed_at": self.listed_at.isoformat() if self.listed_at else None,
+            "last_reviewed_at": self.last_reviewed_at.isoformat() if self.last_reviewed_at else None,
+        }
+
+
 class PriceCache(db.Model):
     __tablename__ = "price_cache"
 

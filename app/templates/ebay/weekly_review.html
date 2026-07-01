@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% block title %}eBay Weekly Review — Discogs Lister{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center mb-1">
+  <h2 class="mb-0"><i class="bi bi-calendar-week text-warning me-2"></i>eBay Weekly Review</h2>
+  <a href="{{ url_for('ebay.add') }}" class="btn btn-warning ms-auto">
+    <i class="bi bi-plus-lg me-1"></i>Add Listing
+  </a>
+</div>
+
+<!-- Week navigation -->
+<div class="d-flex align-items-center gap-2 mb-4">
+  <a href="{{ url_for('ebay.weekly_review', week=week_offset + 1) }}" class="btn btn-sm btn-outline-secondary">
+    <i class="bi bi-chevron-left"></i> Prev Week
+  </a>
+  <span class="fw-semibold">
+    {{ start_date.strftime("%b %d") }} – {{ end_date.strftime("%b %d, %Y") }}
+  </span>
+  {% if week_offset > 0 %}
+  <a href="{{ url_for('ebay.weekly_review', week=week_offset - 1) }}" class="btn btn-sm btn-outline-secondary">
+    Next Week <i class="bi bi-chevron-right"></i>
+  </a>
+  {% endif %}
+  {% if week_offset != 1 %}
+  <a href="{{ url_for('ebay.weekly_review', week=1) }}" class="btn btn-sm btn-link text-muted ms-1">Last week</a>
+  {% endif %}
+</div>
+
+<!-- Stats row -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-3">
+    <div class="card border-0 shadow-sm text-center">
+      <div class="card-body py-3">
+        <div class="fs-3 fw-bold">{{ total }}</div>
+        <div class="text-muted small">Listed This Period</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card border-0 shadow-sm text-center">
+      <div class="card-body py-3">
+        <div class="fs-3 fw-bold text-success">{{ active }}</div>
+        <div class="text-muted small">Still Active</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card border-0 shadow-sm text-center">
+      <div class="card-body py-3">
+        <div class="fs-3 fw-bold text-primary">{{ sold }}</div>
+        <div class="text-muted small">Sold</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card border-0 shadow-sm text-center">
+      <div class="card-body py-3">
+        <div class="fs-3 fw-bold text-warning">${{ "%.2f"|format(sold_value) }}</div>
+        <div class="text-muted small">Revenue</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% if listings %}
+<div class="card border-0 shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>Listed</th>
+          <th>Title</th>
+          <th>Artist</th>
+          <th>Cond.</th>
+          <th>Price</th>
+          <th>Views</th>
+          <th>Watchers</th>
+          <th>Status</th>
+          <th>Notes</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for l in listings %}
+        <tr class="{% if l.status == 'sold' %}table-success{% elif l.status == 'ended' %}table-secondary{% endif %}">
+          <td class="small text-muted text-nowrap">{{ l.listed_at.strftime("%b %d") if l.listed_at else "—" }}</td>
+          <td>
+            {% if l.ebay_url %}
+              <a href="{{ l.ebay_url }}" target="_blank" class="text-decoration-none fw-semibold">
+                {{ l.title }}
+                <i class="bi bi-box-arrow-up-right small ms-1 text-muted"></i>
+              </a>
+            {% else %}
+              <span class="fw-semibold">{{ l.title }}</span>
+            {% endif %}
+            {% if l.last_reviewed_at %}
+              <br><small class="text-muted"><i class="bi bi-check2-circle me-1"></i>Reviewed {{ l.last_reviewed_at.strftime("%b %d") }}</small>
+            {% endif %}
+          </td>
+          <td class="small">{{ l.artist or "—" }}</td>
+          <td>
+            {% if l.condition %}
+              <span class="badge bg-secondary">{{ l.condition }}</span>
+            {% else %}—{% endif %}
+          </td>
+          <td class="text-nowrap">
+            {% if l.price %}${{ "%.2f"|format(l.price) }}{% else %}—{% endif %}
+          </td>
+          <td class="text-center">{{ l.views if l.views is not none else "—" }}</td>
+          <td class="text-center">{{ l.watchers if l.watchers is not none else "—" }}</td>
+          <td>
+            {% if l.status == 'active' %}<span class="badge bg-success">Active</span>
+            {% elif l.status == 'sold' %}<span class="badge bg-primary">Sold</span>
+            {% elif l.status == 'ended' %}<span class="badge bg-secondary">Ended</span>
+            {% else %}<span class="badge bg-light text-dark">{{ l.status }}</span>{% endif %}
+          </td>
+          <td class="small text-muted" style="max-width:160px">
+            <span class="text-truncate d-block" title="{{ l.notes or '' }}">{{ l.notes or "" }}</span>
+          </td>
+          <td>
+            <a href="{{ url_for('ebay.edit', listing_id=l.id) }}" class="btn btn-sm btn-outline-secondary">
+              <i class="bi bi-pencil"></i>
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+<p class="text-muted small mt-2">{{ listings|length }} listing(s) — click <i class="bi bi-pencil"></i> to update views, watchers, status, and notes after checking eBay.</p>
+
+{% else %}
+<div class="text-center text-muted py-5">
+  <i class="bi bi-calendar-x display-1 opacity-25"></i>
+  <p class="mt-3">No eBay listings found for this period.</p>
+  <a href="{{ url_for('ebay.add') }}" class="btn btn-warning">
+    <i class="bi bi-plus-lg me-1"></i>Add a Listing
+  </a>
+</div>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if listing else 'Add' }} eBay Listing — Discogs Lister{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center mb-4">
+  <h2 class="mb-0">
+    <i class="bi bi-{{ 'pencil' if listing else 'plus-circle' }} text-warning me-2"></i>
+    {{ 'Edit' if listing else 'Add' }} eBay Listing
+  </h2>
+  <a href="{{ url_for('ebay.weekly_review') }}" class="btn btn-outline-secondary ms-auto">
+    <i class="bi bi-arrow-left me-1"></i>Back to Review
+  </a>
+</div>
+
+<div class="row justify-content-center">
+  <div class="col-lg-7">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-4">
+        <form method="POST">
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-8">
+              <label class="form-label fw-semibold">Title <span class="text-danger">*</span></label>
+              <input type="text" name="title" class="form-control" required
+                     value="{{ listing.title if listing else '' }}"
+                     placeholder="Artist – Album Title (Vinyl)">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">Date Listed</label>
+              <input type="date" name="listed_at" class="form-control"
+                     value="{{ listing.listed_at.strftime('%Y-%m-%d') if listing and listing.listed_at else today }}">
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label">Artist</label>
+              <input type="text" name="artist" class="form-control"
+                     value="{{ listing.artist or '' if listing else '' }}"
+                     placeholder="e.g. The Beatles">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Format</label>
+              <select name="format" class="form-select">
+                <option value="">—</option>
+                {% for f in ['Vinyl', 'CD', 'Cassette', 'DVD', 'Blu-ray', 'Box Set', 'Other'] %}
+                <option {% if listing and listing.format == f %}selected{% endif %}>{{ f }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Condition</label>
+              <select name="condition" class="form-select">
+                <option value="">—</option>
+                {% for c in ['Mint', 'Near Mint', 'Very Good Plus', 'Very Good', 'Good Plus', 'Good', 'Fair', 'Poor'] %}
+                <option {% if listing and listing.condition == c %}selected{% endif %}>{{ c }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-5">
+              <label class="form-label">Price</label>
+              <div class="input-group">
+                <select name="currency" class="form-select" style="max-width:90px">
+                  {% for cur in ['USD', 'CAD', 'GBP', 'EUR', 'AUD'] %}
+                  <option {% if listing and listing.currency == cur %}selected{% elif not listing and cur == 'USD' %}selected{% endif %}>{{ cur }}</option>
+                  {% endfor %}
+                </select>
+                <input type="number" step="0.01" min="0" name="price" class="form-control"
+                       value="{{ listing.price or '' if listing else '' }}"
+                       placeholder="0.00">
+              </div>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Status</label>
+              <select name="status" class="form-select">
+                <option value="active" {% if not listing or listing.status == 'active' %}selected{% endif %}>Active</option>
+                <option value="sold" {% if listing and listing.status == 'sold' %}selected{% endif %}>Sold</option>
+                <option value="ended" {% if listing and listing.status == 'ended' %}selected{% endif %}>Ended</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">eBay Listing ID</label>
+              <input type="text" name="ebay_listing_id" class="form-control"
+                     value="{{ listing.ebay_listing_id or '' if listing else '' }}"
+                     placeholder="12345…">
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">eBay Listing URL</label>
+            <input type="url" name="ebay_url" class="form-control"
+                   value="{{ listing.ebay_url or '' if listing else '' }}"
+                   placeholder="https://www.ebay.com/itm/…">
+          </div>
+
+          {% if listing %}
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label">Views <small class="text-muted">(update when reviewing)</small></label>
+              <input type="number" min="0" name="views" class="form-control"
+                     value="{{ listing.views if listing.views is not none else '' }}"
+                     placeholder="—">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Watchers</label>
+              <input type="number" min="0" name="watchers" class="form-control"
+                     value="{{ listing.watchers if listing.watchers is not none else '' }}"
+                     placeholder="—">
+            </div>
+          </div>
+          {% endif %}
+
+          <div class="mb-4">
+            <label class="form-label">Notes</label>
+            <textarea name="notes" class="form-control" rows="2"
+                      placeholder="e.g. No offers, rare pressing, price drop considered after 2 weeks">{{ listing.notes or '' if listing else '' }}</textarea>
+          </div>
+
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-warning px-4">
+              <i class="bi bi-check-lg me-1"></i>{{ 'Save Changes' if listing else 'Add Listing' }}
+            </button>
+            <a href="{{ url_for('ebay.weekly_review') }}" class="btn btn-outline-secondary">Cancel</a>
+            {% if listing %}
+            <form method="POST" action="{{ url_for('ebay.delete', listing_id=listing.id) }}" class="ms-auto"
+                  onsubmit="return confirm('Delete this listing?')">
+              <button class="btn btn-outline-danger"><i class="bi bi-trash me-1"></i>Delete</button>
+            </form>
+            {% endif %}
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

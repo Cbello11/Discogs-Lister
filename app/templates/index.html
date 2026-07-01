@@ -39,6 +39,48 @@
   </div>
 </div>
 
+<!-- eBay quick stats -->
+<div class="row g-3 mb-5">
+  <div class="col-12">
+    <h6 class="text-muted text-uppercase" style="font-size:.75rem;letter-spacing:.05em">eBay</h6>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <a href="{{ url_for('ebay.overview', status='active') }}" class="card text-center border-0 shadow-sm text-decoration-none">
+      <div class="card-body py-3">
+        <div class="fs-3 fw-bold text-success">{{ ebay_active }}</div>
+        <div class="text-muted small">Active eBay Listings</div>
+      </div>
+    </a>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <a href="{{ url_for('ebay.weekly_review', week=1) }}" class="card text-center border-0 shadow-sm text-decoration-none position-relative">
+      <div class="card-body py-3">
+        <div class="fs-3 fw-bold {% if ebay_needs_review > 0 %}text-danger{% else %}text-muted{% endif %}">{{ ebay_needs_review }}</div>
+        <div class="text-muted small">Need Review</div>
+      </div>
+      {% if ebay_needs_review > 0 %}
+      <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size:.65rem">!</span>
+      {% endif %}
+    </a>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <a href="{{ url_for('ebay.weekly_review') }}" class="card text-center border-0 shadow-sm text-decoration-none">
+      <div class="card-body py-3">
+        <i class="bi bi-calendar-week fs-3 text-warning"></i>
+        <div class="text-muted small mt-1">Weekly Review</div>
+      </div>
+    </a>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <a href="{{ url_for('ebay.add') }}" class="card text-center border-0 shadow-sm text-decoration-none">
+      <div class="card-body py-3">
+        <i class="bi bi-plus-circle fs-3 text-warning"></i>
+        <div class="text-muted small mt-1">Log eBay Listing</div>
+      </div>
+    </a>
+  </div>
+</div>
+
 {% if recent %}
 <h5 class="mb-3">Recent Listings</h5>
 <div class="card border-0 shadow-sm">
